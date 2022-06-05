@@ -4,4 +4,4 @@
 ## lyy:
 rmrb.csv用excel打开是中文乱码，用记事本打开可以看；
 
-原news.csv和人民日报rmrb.csv都在mySpider文件下
+原news.csv和人民日报rmrb.csv都在mySpider文件下;
