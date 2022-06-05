@@ -26,4 +26,4 @@ if __name__ == "__main__":
             did += 1
             rmrb_writer.writerow([did, row[0]])
     toc = time.time()
-    print(toc-tic)
+    print("times:", toc-tic)
