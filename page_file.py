@@ -17,6 +17,7 @@ if __name__ == "__main__":
                 continue
             did += 1
             news_writer.writerow([did, row[0]])
+
     # 对rmrb.csv进行操作，要用utf-8编码打开，a代表追加
     with open(r".\files\rmrb.csv", encoding='utf-8') as fin2, open(r".\files\pages.csv", "a", newline='') as fout2:
         rmrb_reader = csv.reader(fin2)
