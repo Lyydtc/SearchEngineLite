@@ -1,12 +1,14 @@
 s = input('请输入想要搜查的东西')
-thislist = s.split(" ")
-letterlist = []
-letternumlist = []
-Inverted_index_list = []
+thislist = s.split(" ")    #存放想要搜索的字符串列表
+letterlist = []            #存放爬取的单词列表
+letternumlist = []         #存放爬取的单词对应的单词编号列表
+Inverted_index_list = []   #存放倒排索引数据列表
 webpagelist = []
-list3 = [0] * 1000
+orderlist = []
+list3 = [0] * 10000
 list4 = []
 list5 = []
+temp = []
 i = 1
 while i <= 1000:
     list4.append(str(i))
@@ -19,15 +21,9 @@ with open('C:\\Users\\26292\\Desktop\\新建 Microsoft Excel 工作表.csv', enc
         reader = df.readline()
 # 顺序查找单词编号
 for a in thislist:
-    # judgenum = 0
     for aa in letterlist:
         if (a == aa[0]):
             letternumlist.extend(aa[1:])
-        #     break
-        # elif (judgenum == len(letterlist)-1 ):
-        #     print("没有查找的你想搜索的文字" )
-        #     print(a)
-        # judgenum += 1
 print("已为您找到最相关的网页网址如下")
 # 读取倒排索引文件
 with open('C:\\Users\\26292\\Desktop\\123工作表.csv', encoding='utf-8-sig') as df1:
@@ -64,11 +60,51 @@ for aaa in letternumlist:
 
 m = 0
 while m < 1000:
-    list5.append([str(list3[m]), list4[m]])
+    list5.append([list4[m], str(list3[m])])
     m += 1
 
-#
-with open('C:\\Users\\26292\\Desktop\\wangzhil 工作表.csv', encoding='utf-8-sig') as df2:
+def merge(src, temp_list, low, high):
+    i = low
+    mid = (low + high) // 2
+    j = mid + 1
+
+    while (i <= mid) and (j <= high):
+        if (src[i][1] < src[j][1]):
+            temp_list.append(src[i])
+            i += 1
+        else:
+            temp_list.append(src[j])
+            j += 1
+    while i <= mid:
+        temp_list.append(src[i])
+        i += 1
+    while j <= high:
+        temp_list.append(src[j])
+        j += 1
+
+    t = 0
+    while low <= high:
+        src[low] = temp_list[t]
+        low += 1
+        t += 1
+
+    temp_list.clear()
+
+
+def erfen(src, temp_list, low, high):
+    if low < high:
+        mid = (high + low) // 2
+        erfen(src, temp_list, low, mid)  # 递归划分左半区
+        # print(['left', low, mid, high])  # 递归划分左半区
+        erfen(src, temp_list, mid + 1, high)  # 递归划分右半区
+        # print(['right', low, mid + 1, high])  # 递归划分右半区
+        # print([low, mid, high])  # 递归划分右半区
+        merge(src, temp_list, low, high)  # 最后进行归并
+
+
+erfen(list5, temp, 0, len(list5) - 1)
+
+with open('C:\\Users\\26292\\Documents\\GitHub\\SearchEngineLite\\files\\pages.csv', encoding='utf-8-sig') as df2:
     reader = df2.readline()
     while reader:
         l = reader.replace('\n', '').split(',')
@@ -76,5 +112,5 @@ with open('C:\\Users\\26292\\Desktop\\wangzhil 工作表.csv', encoding='utf-8-s
         reader = df2.readline()
 for aaaa in list5:
     for aaaaa in webpagelist:
-        if (aaaa[0] != '0' and aaaa[1] == aaaaa[0]):
+        if (aaaa[1] != '0' and aaaa[0] == aaaaa[0]):
             print(aaaaa[1])
