@@ -99,8 +99,8 @@ def clean_list(wordlist: list):
 
 tic = time.time()  # 计时开始
 
-term_id = 0  # 单词编号
-num = 0  # 网页编号
+tid = 0  # 单词编号
+did = 0  # 网页编号
 
 # 分析news文件
 with open(r'./files/news.csv', 'r') as fin1, \
@@ -117,20 +117,22 @@ with open(r'./files/news.csv', 'r') as fin1, \
         count += 1
         if count in range(4399, 4524) or count in range(3673, 3815) or count in range(395, 449):
             continue
-        num += 1
+        did += 1
+
         row[2] += row[1]  # 把文本都放入列表row[2]
-        row[2] = clean_list(row[2].split()) # 清理文本，生成单词列表
+        row[2] = clean_list(row[2].split())  # 清理文本，生成单词列表
 
         # 遍历单词列表，写入单词编号文件和临时索引文件
         for word in row[2]:
-            if t.search(word):
+            result = t.search(word)
+            if result[0]:
+                index_writer.writerow([did, result[1]])         # 如果找到，写入临时索引文件，下一个单词
                 continue
             else:
-                t.insert(word)
-                term_id += 1
-                id_writer.writerow([term_id, word])
-                index_writer.writerow([term_id, num])
-                print(term_id, word)
+                tid += 1
+                t.insert(word, tid)                                  # 如果没找到，插入树，写入单词编号文件和临时索引文件
+                id_writer.writerow([tid, word])
+                index_writer.writerow([did, tid])
 
 en_toc = time.time()  # 计时结束
 print("分析news.csv耗时：", en_toc-tic)
@@ -147,23 +149,24 @@ with open(r'./files/rmrb.csv', 'r', encoding='utf-8') as fin2, \
     count = 0
 
     for row in rmrb_reader:
-        num += 1
         count += 1
         if count == 1:
             continue
+        did += 1
         row[2] += row[1]  # 把文本都放入列表row[2]
         row[2] = bi_segment(row[2])  # 清理文本，生成单词列表
 
         # 遍历单词列表，写入单词编号文件和临时索引文件
         for word in row[2]:
-            if t.search(word):
+            result = t.search(word)
+            if result[0]:
+                index_writer.writerow([did, result[1]])
                 continue
             else:
-                t.insert(word)
-                term_id += 1
-                id_writer.writerow([term_id, word])
-                index_writer.writerow([term_id, num])
-                print(term_id, word)
+                tid += 1
+                t.insert(word, tid)
+                id_writer.writerow([tid, word])
+                index_writer.writerow([did, tid])
 
 cn_toc = time.time()  # 计时结束
-print("分析rmrb.csv耗时：", cn_toc-tic)
+print("分析rmrb.csv耗时：", cn_toc-en_toc)
