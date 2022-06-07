@@ -77,6 +77,13 @@ from cn_segment import bi_segment
     #     print(X_ff[i])
     #     i = i+1
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
+
+
+signs = [' ', '，', '。', '！', '？', '“', '”', '《', '》', '（', '）', '·', '、', '：', '——', '；', '—', '……',
+         '.', '>', ',', '(', ')', '<', '>', ';', ':', '.', '?', '!', '"']
+
+
+# 清洗单词列表，使列表元素为纯英语单词
 def clean_list(wordlist: list):
     clean_word_list = []
     for word in wordlist:
@@ -90,9 +97,6 @@ def clean_list(wordlist: list):
     return clean_word_list
 
 
-signs = [' ', '，', '。', '！', '？', '“', '”', '《', '》', '（', '）', '·', '、', '：', '——', '；', '—', '……',
-         '.', '>', ',', '(', ')', '<', '>', ';', ':', '.', '?', '!', '"']
-
 tic = time.time()  # 计时开始
 
 term_id = 0  # 单词编号
@@ -100,7 +104,8 @@ num = 0  # 网页编号
 
 # 分析news文件
 with open(r'./files/news.csv', 'r') as fin1, \
-        open(r'./files/temp_index.csv', 'w', newline='') as fout1, open(r'./files/term_id.csv', 'w', newline='') as fout2:
+        open(r'./files/temp_index.csv', 'w', newline='') as fout1, \
+        open(r'./files/term_id.csv', 'w', newline='') as fout2:
     news_reader = csv.reader(fin1)
     index_writer = csv.writer(fout1)
     id_writer = csv.writer(fout2)
@@ -131,8 +136,9 @@ en_toc = time.time()  # 计时结束
 print("分析news.csv耗时：", en_toc-tic)
 
 # 分析rmrb文件
-with open(r'./files/rmrb.csv', 'r', encoding = 'utf-8') as fin2, \
-        open(r'./files/temp_index.csv', 'a', newline='') as fout1, open(r'./files/term_id.csv', 'a', newline='') as fout2:
+with open(r'./files/rmrb.csv', 'r', encoding='utf-8') as fin2, \
+        open(r'./files/temp_index.csv', 'a', newline='') as fout1, \
+        open(r'./files/term_id.csv', 'a', newline='', encoding='utf8') as fout2:
     rmrb_reader = csv.reader(fin2)
     index_writer = csv.writer(fout1)
     id_writer = csv.writer(fout2)
