@@ -1,3 +1,4 @@
+#coding=utf-8
 import csv
 import time
 from trie import TrieNode
@@ -145,8 +146,15 @@ with open(r'./files/rmrb.csv', 'r', encoding='utf-8') as fin2, \
     index_writer = csv.writer(fout1)
     id_writer = csv.writer(fout2)
 
-    t = TrieNode()
+    # 建立词典树，用于对人民日报分词
+    t_seg = TrieNode()
+    with open(r".\files\dict.csv", encoding='utf-8') as cn_dict_csv:
+        cn_dict = csv.reader(cn_dict_csv)
+        for word in cn_dict:
+            t_seg.insert(word[0])
+
     count = 0
+    t_tid = TrieNode()  # 用于单词编号
 
     for row in rmrb_reader:
         count += 1
@@ -154,17 +162,17 @@ with open(r'./files/rmrb.csv', 'r', encoding='utf-8') as fin2, \
             continue
         did += 1
         row[2] += row[1]  # 把文本都放入列表row[2]
-        row[2] = bi_segment(row[2])  # 清理文本，生成单词列表
+        row[2] = bi_segment(row[2], t_seg)  # 清理文本，生成单词列表
 
         # 遍历单词列表，写入单词编号文件和临时索引文件
         for word in row[2]:
-            result = t.search(word)
+            result = t_tid.search(word)
             if result[0]:
                 index_writer.writerow([did, result[1]])
                 continue
             else:
                 tid += 1
-                t.insert(word, tid)
+                t_tid.insert(word, tid)
                 id_writer.writerow([tid, word])
                 index_writer.writerow([did, tid])
 
