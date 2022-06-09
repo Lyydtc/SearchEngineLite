@@ -80,11 +80,9 @@ from cn_segment import bi_segment
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
 
 
-signs = [' ', '，', '。', '！', '？', '“', '”', '《', '》', '（', '）', '·', '、', '：', '——', '；', '—', '……',
-         '.', '>', ',', '(', ')', '<', '>', ';', ':', '.', '?', '!', '"']
-
-
 # 清洗单词列表，使列表元素为纯英语单词
+
+
 def clean_list(wordlist: list):
     clean_word_list = []
     for word in wordlist:
@@ -127,13 +125,13 @@ with open(r'./files/news.csv', 'r') as fin1, \
         for word in row[2]:
             result = t.search(word)
             if result[0]:
-                index_writer.writerow([did, result[1]])         # 如果找到，写入临时索引文件，下一个单词
+                index_writer.writerow([result[1], did])         # 如果找到，写入临时索引文件，下一个单词
                 continue
             else:
                 tid += 1
                 t.insert(word, tid)                                  # 如果没找到，插入树，写入单词编号文件和临时索引文件
                 id_writer.writerow([tid, word])
-                index_writer.writerow([did, tid])
+                index_writer.writerow([tid, did])
 
 en_toc = time.time()  # 计时结束
 print("分析news.csv耗时：", en_toc-tic)
@@ -167,13 +165,13 @@ with open(r'./files/rmrb.csv', 'r', encoding='utf-8') as fin2, \
         for word in row[2]:
             result = t_tid.search(word)
             if result[0]:
-                index_writer.writerow([did, result[1]])
+                index_writer.writerow([result[1], did])
                 continue
             else:
                 tid += 1
                 t_tid.insert(word, tid)
                 id_writer.writerow([tid, word])
-                index_writer.writerow([did, tid])
+                index_writer.writerow([tid, did])
 
 cn_toc = time.time()  # 计时结束
 print("分析rmrb.csv耗时：", cn_toc-en_toc)
