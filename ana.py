@@ -148,10 +148,9 @@ with open(r'./files/rmrb.csv', 'r', encoding='utf-8') as fin2, \
 
     # 建立词典树，用于对人民日报分词
     t_seg = TrieNode()
-    with open(r".\files\dict.csv", encoding='utf-8') as cn_dict_csv:
-        cn_dict = csv.reader(cn_dict_csv)
-        for word in cn_dict:
-            t_seg.insert(word[0])
+    with open(r".\files\webdict.txt", encoding='utf-8') as f:
+        for line in f.readlines():
+            t_seg.insert(line.split()[0])
 
     count = 0
     t_tid = TrieNode()  # 用于单词编号
