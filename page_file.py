@@ -16,7 +16,7 @@ if __name__ == "__main__":
             if count in range(4399, 4524) or count in range(3673, 3815) or count in range(395, 449):
                 continue
             did += 1
-            news_writer.writerow([did, row[0]])
+            news_writer.writerow([did, row[0], row[1]])
 
     # 对rmrb.csv进行操作，要用utf-8编码打开，a代表追加
     with open(r".\files\rmrb.csv", encoding='utf-8') as fin2, open(r".\files\pages.csv", "a", newline='') as fout2:
@@ -28,7 +28,7 @@ if __name__ == "__main__":
             if count == 1:
                 continue
             did += 1
-            rmrb_writer.writerow([did, row[0]])
+            rmrb_writer.writerow([did, row[0], row[1]])
     # 计时结束
     toc = time.time()
     # 打印耗时
