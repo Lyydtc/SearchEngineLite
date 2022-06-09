@@ -6,11 +6,10 @@ from trie import TrieNode
 # Inverted_index_list = []   #存放倒排索引数据列表
 # webpagelist = []
 # orderlist = []
-# list3 = [0] * 10000
-# list4 = []
-# list5 = []
-# temp = []
-# i = 1
+list3 = [0] * 10000
+list5 = []
+temp_list = []
+
 
 
 # 将输入字符串分为词列表
@@ -46,9 +45,53 @@ def find_didlist(tid_list):
 
 
 def cal_didlist(didlist_list):
+    m = 0
     final_didlist = []
+    while m < len(didlist_list):
+        list5.append([didlist_list, str(list3[m])])  # 网页 出现次数
+        m += 1
+    erfen(list5, temp_list, 0, len(list5) - 1)
+    for row in list5:
+        final_didlist.append(list5[0])
     return final_didlist
 
+
+def merge(src, temp_list, low, high):
+    i = low
+    mid = (low + high) // 2
+    j = mid + 1
+
+    while (i <= mid) and (j <= high):
+        if (src[i][1] < src[j][1]):
+            temp_list.append(src[i])
+            i += 1
+        else:
+            temp_list.append(src[j])
+            j += 1
+    while i <= mid:
+        temp_list.append(src[i])
+        i += 1
+    while j <= high:
+        temp_list.append(src[j])
+        j += 1
+    t = 0
+    while low <= high:
+        src[low] = temp_list[t]
+        low += 1
+        t += 1
+
+    temp_list.clear()
+
+
+def erfen(src, temp_list, low, high):
+    if low < high:
+        mid = (high + low) // 2
+        erfen(src, temp_list, low, mid)  # 递归划分左半区
+        # print(['left', low, mid, high])  # 递归划分左半区
+        erfen(src, temp_list, mid + 1, high)  # 递归划分右半区
+        # print(['right', low, mid + 1, high])  # 递归划分右半区
+        # print([low, mid, high])  # 递归划分右半区
+        merge(src, temp_list, low, high)  # 最后进行归并
 
 def show_pages(did_list):
     with open(r'./files/pages.csv') as f:
@@ -56,7 +99,7 @@ def show_pages(did_list):
         for did in did_list:
             for row in page_reader:
                 if str(did) == row[0]:
-                    print(row[2]+'\n'+row[1]+'\n')
+                    print(row[2] + '\n' + row[1] + '\n')
                     break
         print('已为您找到如上搜索结果')
     return
@@ -65,11 +108,11 @@ def show_pages(did_list):
 if __name__ == '__main__':
     sen = input('请输入关键词：\n')
 
-    word_list = seg_str(sen)                # 得到词语列表
-    tid_list = find_tid(word_list)          # 得到单词编号
-    didlist_list = find_didlist(tid_list)   # 得到对应网页编号
-    did_list = cal_didlist(didlist_list)    # 得到最终网页编号
-    show_pages(did_list)                    # 呈现搜索结果
+    word_list = seg_str(sen)  # 得到词语列表
+    tid_list = find_tid(word_list)  # 得到单词编号
+    didlist_list = find_didlist(tid_list)  # 得到对应网页编号
+    did_list = cal_didlist(didlist_list)  # 得到最终网页编号
+    show_pages(did_list)  # 呈现搜索结果
 
 # while i <= 1000:
 #     list4.append(str(i))
