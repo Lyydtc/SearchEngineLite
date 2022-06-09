@@ -6,7 +6,7 @@ from trie import TrieNode
 
 def forward_segment(text, trie):
     word_list = []
-    sen_list = re.split('[，。、：；“”？！—…（）《》*]', text)
+    sen_list = re.split('[，。、：；“”？！—…（）《》*0-9a-z]', text)
     for sen in sen_list:
         i = 0
         while i < len(sen):
@@ -23,7 +23,7 @@ def forward_segment(text, trie):
 
 def backward_segment(text, trie):
     text_word_list = []
-    sen_list = re.split('[，。、：；“”？！—…（）《》*]', text)
+    sen_list = re.split('[，。、：；“”？！—…（）《》*0-9a-z]', text)
     for sen in sen_list:
         i = len(sen) - 1
         sen_word_list = []
