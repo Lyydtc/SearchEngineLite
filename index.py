@@ -7,269 +7,184 @@ def Pre():
     PAGE_SIZE = 4096  # page = 4KB
     BUF_PAGES = 32
     BUF_SIZE = PAGE_SIZE * BUF_PAGES
-    BUF_LEN = int(PAGE_SIZE / 4)  # 归并段长度不得大于1096/4=1024
+    BUF_LEN = int(PAGE_SIZE / 4)  # 归并段长度不得大于4096/4=1024
     return BUF_LEN
 
 
 def read():
+    read_data = []
     data = []
-    with open(r'G:\dm\sf_kcsj\sy\\temp_index.csv', 'r') as file:# 路径修改
+    with open(r'G:\dm\sf_kcsj\sy\\temp_index.csv', 'r') as file:
         reader = csv.reader(file)
-        for line in reader:
-            data.append(line)  # 将csv中内容（临时索引）读入data列表
+        j = 0
+        for row in reader:
+            j = j + 1
+            read_data.append(row)  # 将csv中内容（临时索引）读入data列表
+            if j == 1024:
+                temp = quick_sort(read_data)
+                data.append(temp)
+                j = 0
+                read_data = []
+    if j != 0:
+        temp = quick_sort(read_data)
+        data.append(temp)
+    # print(data[1919])
+    # print(len(data))
+    # print(len(data[1953]))
     return data
 
 
-def run(length, datalength):
-    num = 4
-    for r in range(sys.maxsize):
-        l = int(datalength / num) + 1
-        if l < length - 1:
-            break
-        num = num * 4
-    return l
+def quick_sort(arr):
+    if len(arr) < 2:
+        # 基线条件：为空或只包含一个元素的数组是“有序”的
+        return arr
+    else:
+        # 递归条件
+        pivot = int(arr[0][0])
+        # 由所有小于基准值的元素组成的子数组
+        less = [i for i in arr[1:] if int(i[0]) <= pivot]
+        # 由所有大于基准值的元素组成的子数组
+        greater = [i for i in arr[1:] if int(i[0]) > pivot]
+        return quick_sort(less) + [arr[0]] + quick_sort(greater)
 
 
-def trans(data, num_runs, run_length, m_length, m):
-    run_1 = [[0 for a in range(run_length)] for b in range(num_runs)]
-    run_2 = [[0 for a in range(run_length)] for b in range(num_runs)]
-    for i in range(num_runs):
-        if i >= m:
-            for j in range(m_length - 1):
-                run_1[i][j] = int(data[m * run_length + (i - m) * m_length + j][0])
-                run_2[i][j] = int(data[m * run_length + (i - m) * m_length + j][1])
-            run_1[i][m_length - 1] = MAX
-            run_2[i][m_length - 1] = MAX
-        else:
-            for j in range(run_length - 1):
-                run_1[i][j] = int(data[i * run_length + j][0])
-                run_2[i][j] = int(data[i * run_length + j][1])
-            run_1[i][run_length - 1] = MAX
-            run_2[i][run_length - 1] = MAX
-
-    transdata1 = []
-    transdata2 = []
-    for i in range(num_runs):
-        for j in range(run_length):
-            transdata1.append(run_1[i][j])
-            transdata2.append(run_2[i][j])
-    transdata = [transdata1, transdata2]
-    # print(transdata)
-    return transdata
-
-
-def sort(transdata, num_runs, run_length, m_length, n):
-    temp = [[0 for a in range(run_length)] for b in range(2)]
-    sortdata = []
-    for i in range(num_runs):
-        sortdata1 = []
-        sortdata2 = []
-        for j in range(run_length):
-            temp[0][j] = transdata[0][run_length * i + j]
-            temp[1][j] = transdata[1][run_length * i + j]
-        if i < n:
-            for t in range(run_length - 1):
-                for p in range(1, run_length - t):
-                    k = run_length - p
-                    if temp[0][k] > temp[0][k - 1]:
-                        tem1 = temp[0][k]
-                        temp[0][k] = temp[0][k - 1]
-                        temp[0][k - 1] = tem1
-                        tem2 = temp[1][k]
-                        temp[1][k] = temp[1][k - 1]
-                        temp[1][k - 1] = tem2
-            for m in range(run_length):
-                transdata[0][run_length * i + m] = temp[0][m]
-                transdata[1][run_length * i + m] = temp[1][m]
-        else:
-            for t in range(m_length - 1):
-                for p in range(1, run_length - t):
-                    k = run_length - p
-                    if temp[0][k] > temp[0][k - 1]:
-                        tem1 = temp[0][k]
-                        temp[0][k] = temp[0][k - 1]
-                        temp[0][k - 1] = tem1
-                        tem2 = temp[1][k]
-                        temp[1][k] = temp[1][k - 1]
-                        temp[1][k - 1] = tem2
-            for m in range(run_length):  # 将最后一个子归并段赋给临时数组进行处理
-                transdata[0][run_length * i + m] = temp[0][m]
-                transdata[1][run_length * i + m] = temp[1][m]
-        for k in range(run_length):
-            sortdata1.append(transdata[0][run_length * i + k])
-            sortdata2.append(transdata[1][run_length * i + k])
-        sortdata.append(sortdata1)
-        sortdata.append(sortdata2)
-    # print(sortdata)
-    return sortdata
-
-
-def adjust(s):
-    t = (s + K) // 2  # 取s位的父节点
-
+def adjust(s, value, ls):
+    m = (s + K) // 2  # 取s位的父节点
     # 如果当前节点不是根节点则进入下次循环，否则跳出
-    while t > 0:
+    while m > 0:
         # 比较当前节点值与父节点对应的值，如果父节点胜出则记录失败者并将当前节点换成胜利者
-        if value[s] > value[ls[t]]:
-            l = ls[t]
-            ls[t] = s
-            s = l
-        t = t // 2
+        if value[s] > value[ls[m]]:
+            n = ls[m]
+            ls[m] = s
+            s = n
+        m = m // 2
     # 记录最终胜利者到ls[0]
     ls[0] = s
+    return ls
 
 
-def Init():
+def Init(value, ls):
     value.append(-1)
     for i in range(len(value)):
         ls.append(len(value) - 1)
     for i in range(K):
-        adjust(i)
+        ls = adjust(i, value, ls)
+    return ls
 
 
-def split(windata, length, num):
-    splitdata = []
-    for x in range(num):
-        temp = []
-        tem = []
-        for j in range(length):
-            temp.append(windata[x * length + j])
-        temp.append(MAX)
-        for j in range(length + 1):
-            tem.append(temp.pop())
-        splitdata.append(tem)
-    # print(splitdata)
-    # print(len(splitdata))
-    return splitdata
-
-
-def check(windata):
-    checkdata1 = []
-    checkdata2 = []
-    start = 0
-    now = 0
-    end = 0
-    c = 0
-    judge = 0
-    for w in range(len(windata[0])):
-        if windata[0][w] == 0:
-            now = windata[0][w + 1]
-            start = w + 1
-            continue
-        if windata[0][w] == now:
-            judge = 0
-            if start == w:
-                string = str(windata[1][w])
-            else:
-                for k in range(start, w):
-                    if windata[1][k] == windata[1][w]:
-                        judge = 1
-                        break
-                if judge != 1:
-                    string = string + ',' + str(windata[1][w])
+def repeat(k_data):
+    value = []
+    ls = []
+    num = [[0] for i in range(K)]
+    windata = []
+    for lenk in range(len(k_data)):
+        value.append(int(k_data[lenk][0][0]))
+    ls = Init(value, ls)
+    while value[ls[0]] < MAX:
+        winner = ls[0]
+        windata.append(k_data[winner][num[winner][0]])
+        if num[winner][0] == (len(k_data[winner]) - 1):
+            value[winner] = MAX
         else:
-            if w < (len(windata[0]) - 1):
-                checkdata1.append(now)
-                checkdata2.append(string)
-                start = w + 1
-                now = windata[0][w + 1]
-                c = c + 1
+            num[winner][0] = num[winner][0] + 1
+            value[winner] = int(k_data[winner][num[winner][0]][0])
+        adjust(winner, value, ls)
+    # print(len(windata))
+    return windata
+
+
+def heapify(arr, n, i):
+    largest = i
+    l = 2 * i + 1  # left = 2*i + 1
+    r = 2 * i + 2  # right = 2*i + 2
+    if l < n and arr[i] < arr[l]:
+        largest = l
+    if r < n and arr[largest] < arr[r]:
+        largest = r
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]  # 交换
+        heapify(arr, n, largest)
+    return(arr)
+
+
+def heapSort(arr):
+    n = len(arr)
+    # Build a maxheap.
+    for i in range(n, -1, -1):
+        heapify(arr, n, i)
+        # 一个个交换元素
+    for i in range(n - 1, 0, -1):
+        arr[i], arr[0] = arr[0], arr[i]  # 交换
+        heapify(arr, i, 0)
+    return arr
+
+
+def manage2(com):
+    m2 = heapSort(com)
+    m1 = [m2[0]]
+    j = 0
+    for i in range(1, len(m2)):
+        if m2[i] != m2[i - 1]:
+            m1.append(m2[i])
+    return m1
+
+
+def manage1(m_data):
+    r1 = []
+    r2 = []
+    r = []
+    compare = []
+    for i in range(1, len(m_data)):
+        compare.append(int(m_data[i-1][1]))
+        if m_data[i][0] != m_data[i - 1][0]:
+            if len(compare) == 1:
+                r2.append(compare)
             else:
-                checkdata1.append(now)
-                checkdata2.append(string)
-                c = c + 1
-    checkdata = []
-    for tc in range(c):
-        checkdata.append([checkdata1[tc], checkdata2[tc]])
-    print(checkdata)
-    return checkdata
+                r2.append(manage2(compare))
+            r2 = r2[0]
+            r.append([int(m_data[i-1][0]), r2])
+            r2 = []
+            r1 = []
+            compare = []
+    return r
 
 
 MAX = sys.maxsize
 Data = read()
-Length = Pre()
-DataLength = len(Data)
-Run_length = run(Length, DataLength)
-Num_runs = int(DataLength / Run_length) + 1  # 归并段数=总长/归并路数，取整加一
-M = Num_runs - (Num_runs * Run_length - DataLength)
-K = 4
-
-Transdata = trans(Data, Num_runs, Run_length, Run_length - 1, M)
-
-Sortdata = sort(Transdata, Num_runs, Run_length, Run_length - 1, M)
-
-Lsdata_t = []
-Lsdata_d = []
-windata_t = []
-windata_d = []
-
-nnum = 0
-# first run
-for i in range(int(len(Sortdata) / 2)):
-    Lsdata_t.append(Sortdata[2 * i])
-for i in range(int(len(Sortdata) / 2)):
-    Lsdata_d.append(Sortdata[2 * i + 1])
-    count = 0
-    ls = []
-for i in range(int(Num_runs / 4)):
-    value = []
-    rundata_t = []
-    rundata_d = []
-    for j in range(4):
-        rundata_t.append(Lsdata_t[4 * i + j])
-        rundata_d.append(Lsdata_d[4 * i + j])
-    for k in range(4):
-        value.append(rundata_t[k].pop())
-    Init()
-    while value[ls[0]] < MAX:
-        # print(value,ls[0])
-        winner = ls[0]
-        windata_t.append(value[winner])
-        windata_d.append(rundata_d[winner].pop())
-        value[winner] = rundata_t[winner].pop()
-        adjust(winner)
-ls = []
-value = []
-Num = 4
-for time in range(1, sys.maxsize):
-    if Num == Num_runs:
+Length = len(Data)
+K = 128
+k = 0
+Run = [Data]
+run = []
+count = 1
+for t in range(MAX):
+    temp = []
+    Run.append(temp)
+    temp = Run[t]
+    if Length == 1:
+        sort = Run[t][0]
         break
-    Num = 4 * Num
-N = Num_runs
-l = Run_length - 1
-for t in range(time):
-    N = N / 4
-    l = l * 4
-    if N != 1:
-        Lsdata_t = split(windata_t, l, int(N))
-        Lsdata_d = split(windata_d, l, int(N))
-        windata_t = []
-        windata_d = []
-        for i in range(int(N / 4)):
-            value = []
-            rundata_t = []
-            rundata_d = []
-            for j in range(4):
-                rundata_t.append(Lsdata_t[4 * i + j])
-                rundata_d.append(Lsdata_d[4 * i + j])
-            for k in range(4):
-                value.append(rundata_t[k].pop())
-            Init()
-            while value[ls[0]] < MAX:
-                # print(value,ls[0])
-                winner = ls[0]
-                windata_t.append(value[winner])
-                windata_d.append(rundata_d[winner].pop())
-                value[winner] = rundata_t[winner].pop()
-                adjust(winner)
     else:
-        break
-
-Windata = [windata_t, windata_d]
-Checkdata = check(Windata)
-# enddata = endsort(Checkdata)
-for i in range(len(Checkdata)):
-    f = open("G:\dm\sf_kcsj\sy\Elasticsearch.csv", 'a', newline='')   #路径修改
+        for L in range(len(temp)):
+            run.append(temp[L])
+            k = k + 1
+            if k == K:
+                k = 0
+                # print(run)
+                Run[t + 1].append(repeat(run))
+                run = []
+        if k != 0:
+            K = k
+            k = 0
+            Run[t + 1].append(repeat(run))
+            run = []
+    K = 128
+    Length = int(Length / K) + 1
+print(1)
+print(len(sort))
+Result = manage1(sort)
+for i in range(len(Result)):
+    f = open("G:\dm\sf_kcsj\sy\Elasticsearch.csv", 'a', newline='')
     writer = csv.writer(f)
-    writer.writerow(Checkdata[i])
+    writer.writerow(Result[i])
     f.close()
