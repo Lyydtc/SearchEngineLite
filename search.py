@@ -16,6 +16,18 @@ def seg_str(sen: str):
     print(f"en list = {b}")
     c = re.findall('[0-9]+', sen)
     print(f"d list = {c}")
+
+    # 建立词典树，用于分词
+    t_seg = TrieNode()
+    with open(r".\files\webdict.txt", encoding='utf-8') as f:
+        for line in f.readlines():
+            t_seg.insert(line.split()[0])
+    cn_wordlist = []
+    for text in a:
+        cn_wordlist += bi_segment(text, t_seg)
+
+    word_list = b+c+cn_wordlist
+    print(word_list)
     return word_list
 
 
