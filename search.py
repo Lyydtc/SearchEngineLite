@@ -3,7 +3,7 @@ from trie import TrieNode
 import re
 from cn_segment import bi_segment
 
-frequency_list3 = [0] * 100000  # 存放初始每个页面出现次数（初始均为0）
+frequency_list3 = [0] * 1000000  # 存放初始每个页面出现次数（初始均为0）
 pagenum_frequency_list5 = []  # 存放页码以及对应的出现次数
 temp_list = []  # 归并排序中存放临时数据
 
@@ -11,11 +11,8 @@ temp_list = []  # 归并排序中存放临时数据
 # 将输入字符串分为词列表
 def seg_str(sen: str):
     a = re.findall(u"[\u4e00-\u9fa5]+", sen)
-    print(f"cn list = {a}")
     b = re.findall('[a-zA-Z]+', sen)
-    print(f"en list = {b}")
     c = re.findall('[0-9]+', sen)
-    print(f"d list = {c}")
 
     # 建立词典树，用于分词
     t_seg = TrieNode()
@@ -25,7 +22,6 @@ def seg_str(sen: str):
     cn_wordlist = []
     for text in a:
         cn_wordlist += bi_segment(text, t_seg)
-
     word_list = b+c+cn_wordlist
     print(word_list)
     return word_list
@@ -46,16 +42,18 @@ def find_tid(word_list):
     return tid_list
 
 
+
 def find_didlist(tid_list):
     didlist_list = []
-    with open('C:\\Users\\26292\\Desktop\\inverted_index.csv') as f1:
-        reader = csv.reader(f1)
+    with open(r'./files/Elasticsearch.csv',encoding='UTF-8-sig') as f1:
+        reader=csv.reader(f1)
         l = list(reader)
         for tid in tid_list:
             m = 0
             while m < len(l):
                 if tid == l[m][0]:
-                    didlist_list.extend(str(l[m][1:][0]).split(','))
+                    list1 = eval(l[m][1])
+                    didlist_list.extend(list1)
                     break
                 m += 1
     return didlist_list
@@ -67,13 +65,14 @@ def cal_didlist(didlist_list):
     final_didlist = []
     while m < len(didlist_list):
         num = int(didlist_list[m]) - 1
-        frequency_list3[num] = frequency_list3[num] + int(didlist_list[m][1])
+        frequency_list3[num] = frequency_list3[num] + 1
         m += 1
     m = 0
-    while m < 10000:  # 总共网页个数，我设置了个10000
+    while m < 10000:  # 总共网页个数，我设置了个100000
         pagenum_frequency_list5.append([str(m + 1), str(frequency_list3[m])])
         m += 1
     erfen(pagenum_frequency_list5, temp_list, 0, len(pagenum_frequency_list5) - 1)
+    # print(pagenum_frequency_list5)
     for row in pagenum_frequency_list5:
         if (row[1] != '0'):
             final_didlist.append(row[0])
@@ -125,7 +124,9 @@ def show_pages(did_list):
         judge = 0
         for did in did_list:
             n = 0
+
             while n < len(ll):
+
                 if did == str(ll[n][0]):
                     judge = 1
                     print(ll[n][2] + '\n' + ll[n][1] + '\n')
