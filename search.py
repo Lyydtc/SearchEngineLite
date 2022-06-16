@@ -22,7 +22,7 @@ def seg_str(sen: str):
     cn_wordlist = []
     for text in a:
         cn_wordlist += bi_segment(text, t_seg)
-    word_list = b+c+cn_wordlist
+    word_list = b + c + cn_wordlist
     print(word_list)
     return word_list
 
@@ -42,13 +42,18 @@ def find_tid(word_list):
     return tid_list
 
 
-
 def find_didlist(tid_list):
     didlist_list = []
-    with open(r'./files/Elasticsearch.csv',encoding='UTF-8-sig') as f1:
-        reader=csv.reader(f1)
+    with open(r'./files/Elasticsearch.csv', encoding='UTF-8-sig') as f1:
+        reader = csv.reader(f1)
         l = list(reader)
+        # print(tid_list)
+        for el in tid_list:
+            if tid_list.count(el) > 1:
+                tid_list.remove(el)
+        # print(tid_list)
         for tid in tid_list:
+
             m = 0
             while m < len(l):
                 if tid == l[m][0]:
@@ -69,10 +74,11 @@ def cal_didlist(didlist_list):
         m += 1
     m = 0
     while m < 10000:  # 总共网页个数，我设置了个100000
-        pagenum_frequency_list5.append([str(m + 1), str(frequency_list3[m])])
+        pagenum_frequency_list5.append([str(m + 1), frequency_list3[m]])
         m += 1
-    erfen(pagenum_frequency_list5, temp_list, 0, len(pagenum_frequency_list5) - 1)
     # print(pagenum_frequency_list5)
+    erfen(pagenum_frequency_list5, temp_list, 0, len(pagenum_frequency_list5) - 1)
+    print(pagenum_frequency_list5)
     for row in pagenum_frequency_list5:
         if (row[1] != '0'):
             final_didlist.append(row[0])
@@ -124,9 +130,7 @@ def show_pages(did_list):
         judge = 0
         for did in did_list:
             n = 0
-
             while n < len(ll):
-
                 if did == str(ll[n][0]):
                     judge = 1
                     print(ll[n][2] + '\n' + ll[n][1] + '\n')
